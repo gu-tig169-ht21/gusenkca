@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import 'secondview.dart';
 import 'stuff.dart';
 
@@ -45,8 +46,8 @@ class _MainViewState extends State<MainView> {
             var newTile = await Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => SecondView(
-                        TodoListTile(text: 'text', checked: false))));
+                    builder: (context) =>
+                        SecondView(TodoListTile(title: 'title', done: false))));
 
             Provider.of<MyState>(context, listen: false).addTile(newTile);
           },
@@ -56,10 +57,10 @@ class _MainViewState extends State<MainView> {
   List<TodoListTile> _filterList(list, filterBy) {
     if (filterBy == 'all') return list;
     if (filterBy == 'done') {
-      return list.where((tile) => tile.checked == true).toList();
+      return list.where((tile) => tile.done == true).toList();
     }
     if (filterBy == 'not done') {
-      return list.where((tile) => tile.checked == false).toList();
+      return list.where((tile) => tile.done == false).toList();
     }
     return list;
   }
