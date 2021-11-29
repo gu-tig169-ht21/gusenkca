@@ -1,36 +1,64 @@
+// ignore_for_file: prefer_const_constructors_in_immutables, use_key_in_widget_constructors
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'api.dart';
 
 class TodoListTile {
-  TodoListTile({required this.text, this.checked = false});
-  String text;
-  bool checked;
+  TodoListTile({this.id = '', required this.title, this.done = false});
+  String id;
+  String title;
+  bool done;
 
-  void trueChecked(TodoListTile tile) {
-    checked = !checked;
+  static Map<String, dynamic> toJson(TodoListTile tile) {
+    return {
+      'id': tile.id,
+      'title': tile.title,
+      'done': tile.done,
+    };
+  }
+
+  static TodoListTile fromJson(Map<String, dynamic> json) {
+    return TodoListTile(
+      id: json['id'],
+      title: json['title'],
+      done: json['done'],
+    );
+  }
+
+  void trueDone(TodoListTile tile) {
+    done = !done;
   }
 }
 
 //////////////////////////////////////////////////////////////
 class MyState extends ChangeNotifier {
-  final List<TodoListTile> _list = [];
+  List<TodoListTile> _list = [];
   String _filterBy = 'all';
 
   List<TodoListTile> get list => _list;
   String get filterBy => _filterBy;
 
-  void addTile(TodoListTile tile) {
-    _list.add(tile);
+  Future getList() async {
+    List<TodoListTile> list = await Api.getTiles();
+    _list = list;
     notifyListeners();
   }
 
-  void removeTile(TodoListTile tile) {
-    _list.remove(tile);
+  void trueTile(TodoListTile tile, id) async {
+    tile.trueDone(tile);
+    //  _list = await Api.editTile(tile, id);  - har fuckat upp något här
+    // crashar när checkbox-värde ändras.
     notifyListeners();
   }
 
-  void trueTile(TodoListTile tile) {
-    tile.trueChecked(tile);
+  void addTile(TodoListTile tile) async {
+    _list = await Api.addTile(tile);
+    notifyListeners();
+  }
+
+  void removeTile(TodoListTile tile) async {
+    _list = await Api.deleteTile(tile.id);
     notifyListeners();
   }
 
@@ -44,18 +72,18 @@ class MyState extends ChangeNotifier {
 class TodoList extends StatelessWidget {
   final List<TodoListTile> list;
 
-  const TodoList(this.list, {Key? key}) : super(key: key);
+  TodoList(this.list);
 
   @override
   Widget build(BuildContext context) {
     return ListView(
-        children: list.map((tile) => _listItem(context, tile)).toList());
+        children: list.map((tile) => _listItem(tile, context)).toList());
   }
 
-  Widget _listItem(context, tile) {
+  Widget _listItem(tile, context) {
     return CheckboxListTile(
       controlAffinity: ListTileControlAffinity.leading,
-      title: Text(tile.text),
+      title: Text(tile.title),
       secondary: IconButton(
         icon: const Icon(Icons.delete_forever),
         onPressed: () {
@@ -63,26 +91,11 @@ class TodoList extends StatelessWidget {
           state.removeTile(tile);
         },
       ),
-      value: tile.checked,
+      value: tile.done,
       onChanged: (value) {
         var state = Provider.of<MyState>(context, listen: false);
-        state.trueTile(tile);
+        state.trueTile(tile, context);
       },
     );
   }
 }
-//////////////////////////////////////////////////////////////
-/*
-      ListTile(
-        title: Text(tile.text),
-
-        trailing: IconButton(
-          icon: Icon(Icons.delete_forever),
-          onPressed: () {
-            var state = Provider.of<MyState>(context, listen: false);
-            state.removeTile(tile);
-          },
-        ),
-      )
-    );
-    */
