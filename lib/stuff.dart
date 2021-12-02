@@ -10,7 +10,7 @@ class TodoListTile {
   String title;
   bool done;
 
-  static Map<String, dynamic> toJson(TodoListTile tile) {
+  static Map<String, dynamic> toJson(TodoListTile tile) { 
     return {
       'id': tile.id,
       'title': tile.title,
@@ -45,10 +45,9 @@ class MyState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void trueTile(TodoListTile tile, id) async {
+  void trueTile(TodoListTile tile) async {
     tile.trueDone(tile);
-    //  _list = await Api.editTile(tile, id);  - har fuckat upp något här
-    // crashar när checkbox-värde ändras.
+    _list = await Api.editTile(tile);
     notifyListeners();
   }
 
@@ -80,7 +79,7 @@ class TodoList extends StatelessWidget {
         children: list.map((tile) => _listItem(tile, context)).toList());
   }
 
-  Widget _listItem(tile, context) {
+  Widget _listItem(TodoListTile tile, context) {
     return CheckboxListTile(
       controlAffinity: ListTileControlAffinity.leading,
       title: Text(tile.title),
@@ -94,7 +93,7 @@ class TodoList extends StatelessWidget {
       value: tile.done,
       onChanged: (value) {
         var state = Provider.of<MyState>(context, listen: false);
-        state.trueTile(tile, context);
+        state.trueTile(tile);
       },
     );
   }

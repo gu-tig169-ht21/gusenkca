@@ -8,6 +8,8 @@ const API_URL = 'https://todoapp-api-pyq5q.ondigitalocean.app';
 const API_KEY = '0023bf8c-bccd-486c-85de-e72aab0eaf49';
 
 class Api {
+
+
   static Future<List<TodoListTile>> addTile(TodoListTile tile) async {
     Map<String, dynamic> json = TodoListTile.toJson(tile);
     var bodyString = jsonEncode(json);
@@ -34,7 +36,7 @@ class Api {
       return TodoListTile.fromJson(data);
     }).toList();
   }
-
+ 
   static Future<List<TodoListTile>> getTiles() async {
     var response = await http.get(Uri.parse('$API_URL/todos?key=$API_KEY'));
     String bodyString = response.body;
@@ -45,13 +47,24 @@ class Api {
     }).toList();
   }
 
-  static Future editTile(TodoListTile tile, String id) async {
+  static Future editTile(TodoListTile tile) async {
+    
     Map<String, dynamic> json = TodoListTile.toJson(tile);
     var bodyString = jsonEncode(json);
-    await http.put(
+    var id = tile.id;
+    var response = await http.put(
       Uri.parse('$API_URL/todos/$id?key=$API_KEY'),
       body: bodyString,
       headers: {'Content-Type': 'application/json'},
     );
+    
+    bodyString = response.body ;
+     var list = jsonDecode(bodyString);
+
+    return list.map<TodoListTile>((data) {
+      return TodoListTile.fromJson(data);
+    }).toList();
+    
+   
   }
 }
