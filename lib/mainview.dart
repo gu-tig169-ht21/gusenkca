@@ -48,8 +48,9 @@ class _MainViewState extends State<MainView> {
                 MaterialPageRoute(
                     builder: (context) =>
                         SecondView(TodoListTile(title: 'title', done: false))));
-
-            Provider.of<MyState>(context, listen: false).addTile(newTile);
+            if (newTile != null) {
+              Provider.of<MyState>(context, listen: false).addTile(newTile);
+            }
           },
         ));
   }
